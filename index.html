@@ -369,8 +369,8 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     [80, 100, 100, 730, 270],      // AI 醫療 左牆
     [800, 1800, 100, 120, 270],    // 長照 上牆 670+300
     [1780, 1800, 100, 490, 270],   // 長照 右牆（微軟）
-    [50, 70, 1000, 1350, 270],     // 精準 左牆（乳房）
-    [50, 800, 1330, 1350, 270],    // 精準 下牆 730
+    [50, 70, 1040, 1390, 270],     // 精準 左牆（乳房）（2026-11-15 隨下牆外推 40cm）
+    [50, 800, 1370, 1390, 270],    // 精準 下牆 730（老闆那面，2026-11-15 外推 40cm）
     [1250, 1800, 900, 920, 320],   // 儲藏室 北牆 550
     [1250, 1270, 900, 1500, 320],  // 儲藏室 西牆 600
     [1780, 1800, 900, 1060, 320],  // 儲藏室 東牆
@@ -412,10 +412,10 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     { code: 'B2', zone: '長照 BODYGO', name: '鴻海展示區（暫用 logo 拼版）', w: 370, h: 270, a: [1779, 120], b: [1779, 490] },
     { code: 'B3', zone: '長照 BODYGO', name: '背面・走道側（醫養一條龍）', w: 970, h: 270, a: [1790, 99], b: [810, 99] },
     { code: 'B4', zone: '長照 BODYGO', name: '背面・主走道側', w: 370, h: 270, a: [1801, 490], b: [1801, 120] },
-    { code: 'C1', zone: '精準大健康', name: '天成精準大健康（180 ＋ 550）', w: 730, h: 270, a: [800, 1329], b: [70, 1329] },
-    { code: 'C2', zone: '精準大健康', name: '乳房醫學中心', w: 330, h: 270, a: [71, 1330], b: [71, 1000] },
-    { code: 'C3', zone: '精準大健康', name: '背面・主走道側（醫養合一的時代）', w: 730, h: 270, a: [70, 1351], b: [800, 1351] },
-    { code: 'C4', zone: '精準大健康', name: '背面・走道側', w: 330, h: 270, a: [49, 1000], b: [49, 1350] },
+    { code: 'C1', zone: '精準大健康', name: '天成精準大健康（180 ＋ 550）', w: 730, h: 270, a: [800, 1369], b: [70, 1369] },
+    { code: 'C2', zone: '精準大健康', name: '乳房醫學中心', w: 330, h: 270, a: [71, 1370], b: [71, 1040] },
+    { code: 'C3', zone: '精準大健康', name: '背面・主走道側（醫養合一的時代）', w: 730, h: 270, a: [70, 1391], b: [800, 1391] },
+    { code: 'C4', zone: '精準大健康', name: '背面・走道側', w: 330, h: 270, a: [49, 1040], b: [49, 1390] },
     { code: 'D1', zone: '儲藏室外牆', name: '健康台灣深耕計畫（北面）', w: 550, h: 320, a: [1800, 899], b: [1250, 899] },
     { code: 'D2', zone: '儲藏室外牆', name: '天成精準大健康・四大主軸（西面）', w: 600, h: 320, a: [1249, 900], b: [1249, 1500] },
   ];
@@ -544,9 +544,10 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
       if (sub) { c.fillStyle = S[3]; c.font = `500 38px ${FONT}`; c.fillText(sub, w / 2, h / 2 + 62); }
     });
   }
-  // 依廠商 3D 圖（2026-11-13）：楣板沿北、東兩邊 → 舞台圓角 → 南邊（接待櫃旁三柱）→ S 形弧線回到 AI 醫療牆尾 → 西邊
-  // 平面圖上那條灰色弧帶就是 S 形楣板的投影；精準大健康區在楣板圈外側
+  // 楣板：沿北、東兩邊 → 舞台圓角 → 南邊 → 西南外凸圓弧回到 AI 醫療牆尾 → 西邊
+  // （2026-11-15 依文董指示：原 S 形內凹改為外凸圓弧，拿掉櫃台旁三柱與入口細柱）
   const FASCIA_H0 = 270, FASCIA_H1 = 335, FASCIA_T = 22;
+  const SW_R = 760, SW_C = [90 + SW_R, 1490 - SW_R];   // 西南圓弧：從 AI 牆尾 (90,730) 到南邊 (850,1490)
   const RING = (() => {
     const pts = [];
     const add = p => { const q = pts[pts.length - 1]; if (!q || Math.hypot(q[0] - p[0], q[1] - p[1]) > 0.5) pts.push(p); };
@@ -555,11 +556,10 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     line([90, 110], [1790, 110], 34);
     line([1790, 110], [1790, STAGE_C[1]], 19);
     for (let i = 0; i <= 30; i++) { const t = (i / 30) * Math.PI / 2; add([STAGE_C[0] + R * Math.cos(t), STAGE_C[1] + R * Math.sin(t)]); }
-    line([STAGE_C[0], STAGE_C[1] + R], [640, 1490], 14);
-    const sc = new T.CatmullRomCurve3([[640, 1490], [560, 1485], [470, 1430], [410, 1320], [378, 1160], [355, 980], [310, 860], [220, 790], [90, 770]]
-      .map(p => new T.Vector3(p[0], p[1], 0)));
-    for (let i = 1; i <= 70; i++) { const v = sc.getPoint(i / 70); add([v.x, v.y]); }
-    line([90, 770], [90, 110], 13);
+    line([STAGE_C[0], STAGE_C[1] + R], [SW_C[0], 1490], 10);
+    // 西南角外凸圓弧（2026-11-15 改：原本 S 形內凹，改成跟舞台一樣的圓角，楣板往外推）
+    for (let i = 1; i <= 48; i++) { const t = Math.PI / 2 + (i / 48) * Math.PI / 2; add([SW_C[0] + SW_R * Math.cos(t), SW_C[1] + SW_R * Math.sin(t)]); }
+    line([90, SW_C[1]], [90, 110], 12);
     const f = pts[0], l = pts[pts.length - 1];
     if (Math.hypot(f[0] - l[0], f[1] - l[1]) < 1) pts.pop();
     return pts;
@@ -677,16 +677,17 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   // 西側外（走道）
   ringSign(90, 330, 230, OUT, 'bluebox', 'AI 醫療');
   ringSign(90, 600, 190, OUT, 'ink', '天晟醫院');
-  // S 形弧線外側（面向精準大健康與主走道）
-  ringSign(215, 789, 170, OUT, 'msft');
-  ringSign(338, 920, 220, OUT, 'gold', '金色年代 長照機構');
-  ringSign(372, 1100, 200, OUT, 'foxconn');
-  ringSign(392, 1270, 170, OUT, 'ink', '天晟醫院');
-  ringSign(520, 1462, 330, OUT, 'ink', '天成醫療體系', 'Ten-Chen Medical Group');
+  // 西南圓弧外側（面向精準大健康與主走道）
+  const swAt = deg => { const t = deg * Math.PI / 180; return [SW_C[0] + SW_R * Math.cos(t), SW_C[1] + SW_R * Math.sin(t)]; };
+  ringSign(...swAt(168), 170, OUT, 'msft');
+  ringSign(...swAt(152), 240, OUT, 'gold', '金色年代 長照機構');
+  ringSign(...swAt(136), 200, OUT, 'foxconn');
+  ringSign(...swAt(121), 180, OUT, 'ink', '天晟醫院');
+  ringSign(...swAt(104), 360, OUT, 'ink', '天成醫療體系', 'Ten-Chen Medical Group');
   // 南側外（主走道）
-  ringSign(880, 1490, 180, OUT, 'msft');
-  ringSign(1060, 1490, 250, OUT, 'gold', '金色年代 長照機構');
-  ringSign(1250, 1490, 200, OUT, 'foxconn');
+  ringSign(1000, 1490, 180, OUT, 'msft');
+  ringSign(1150, 1490, 220, OUT, 'gold', '金色年代 長照機構');
+  ringSign(1295, 1490, 150, OUT, 'foxconn');
   // 舞台圓角外側
   ringSign(1430, 1480, 110, OUT, 'small', 'Health');
   ringSign(1658, 1358, 400, OUT, 'ink', '天成醫療體系', 'Ten-Chen Medical Group');
@@ -700,19 +701,17 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   ringSign(1130, 110, 420, IN, 'goldbox', '長照 BODY GO');
   ringSign(1625, 110, 200, IN, 'msft');
   ringSign(1790, 305, 200, IN, 'foxconn');
-  ringSign(300, 855, 300, IN, 'ink', '天成醫療體系', 'Ten-Chen Medical Group');
-  ringSign(390, 1240, 180, IN, 'ink', '天晟醫院');
-  ringSign(1000, 1490, 320, IN, 'ink', '天成醫療體系', 'Ten-Chen Medical Group');
+  ringSign(...swAt(150), 320, IN, 'ink', '天成醫療體系', 'Ten-Chen Medical Group');
+  ringSign(...swAt(122), 180, IN, 'ink', '天晟醫院');
+  ringSign(1060, 1490, 320, IN, 'ink', '天成醫療體系', 'Ten-Chen Medical Group');
 
   // 精準大健康牆頂的粉紅招牌盒（楣板圈外）
-  block(280, 600, 1322, 1358, 270, 318, MAT.pinkSolid, G.fascia);
+  block(90, 410, 1362, 1398, 270, 318, MAT.pinkSolid, G.fascia);
   {
     const pm = (t, sub) => new T.MeshStandardMaterial({ map: canvasTex(logoCanvas('pinkbox', t, sub, 320)), roughness: 0.5 });
-    facePlane([600, 1321], [280, 1321], 272, 316, pm('精準大健康'), G.fascia);
-    facePlane([280, 1359], [600, 1359], 272, 316, pm('醫療科技 CEO 張育美'), G.fascia);
+    facePlane([410, 1361], [90, 1361], 272, 316, pm('精準大健康'), G.fascia);
+    facePlane([90, 1399], [410, 1399], 272, 316, pm('醫療科技 CEO 張育美'), G.fascia);
   }
-  // 楣板支撐：S 弧線上的細柱
-  cyl(350, 985, 4, 4, FASCIA_H0, MAT.white, G.fascia);
   // 喇叭（楣板轉角上方）
   [[797, 110, 335], [1790, STAGE_C[1], 335], [STAGE_C[0], 1490, 335], [1262, 912, 320]].forEach(([x, y, h]) => {
     block(x - 14, x + 14, y - 14, y + 14, h, h + 42, MAT.black, G.fascia);
@@ -804,17 +803,17 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   monitor(1080, 230, 110, 63, 95, 0); monitor(1210, 300, 110, 63, 95, 0);
 
   // 精準大健康
-  deskBox(72, 180, 1002, 1208, 90, MAT.pinkSolid, MAT.white);  // 展示活動桌 110×210（乳房攝影模型）
-  { const s = new T.Mesh(new T.SphereGeometry(.16, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2), MAT.pinkSolid); s.position.set(wx(125), .9, wz(1100)); s.castShadow = true; G.furniture.add(s);
-    block(105, 145, 1150, 1190, 90, 140, MAT.white); }
-  roundTable(270, 1230, 40, 75);   // 洽談桌＋4 椅（自律神經）
-  [[270, 1165], [335, 1230], [205, 1230], [270, 1295]].forEach(p => chairToward(p[0], p[1], 270, 1230, MAT.chairWhite));
-  deskBox(405, 610, 1160, 1255, 76, MAT.white);  // AI 睡眠展示桌（印表機・筆電）＋ 2 椅
-  block(560, 600, 1175, 1210, 76, 98, MAT.chairWhite); block(440, 485, 1180, 1212, 76, 78, MAT.black);
-  [460, 555].forEach(x => chair(x, 1290, [0, -1], MAT.chairWhite));
+  deskBox(72, 180, 1042, 1248, 90, MAT.pinkSolid, MAT.white);  // 展示活動桌 110×210（乳房攝影模型）
+  { const s = new T.Mesh(new T.SphereGeometry(.16, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2), MAT.pinkSolid); s.position.set(wx(125), .9, wz(1140)); s.castShadow = true; G.furniture.add(s);
+    block(105, 145, 1190, 1230, 90, 140, MAT.white); }
+  roundTable(275, 1265, 40, 75);   // 洽談桌＋4 椅（自律神經）
+  [[275, 1200], [340, 1265], [210, 1265], [275, 1330]].forEach(p => chairToward(p[0], p[1], 275, 1265, MAT.chairWhite));
+  deskBox(430, 635, 1200, 1295, 76, MAT.white);  // AI 睡眠展示桌（印表機・筆電）＋ 2 椅
+  block(585, 625, 1215, 1250, 76, 98, MAT.chairWhite); block(465, 510, 1220, 1252, 76, 78, MAT.black);
+  [485, 580].forEach(x => chair(x, 1330, [0, -1], MAT.chairWhite));
   // 65 吋觸控電視（九宮格，C1 東段）
-  block(620, 764, 1322, 1328, 110, 191, MAT.black);
-  facePlane([764, 1321.5], [620, 1321.5], 113, 188, MAT.screen, G.furniture);
+  block(620, 764, 1362, 1368, 110, 191, MAT.black);
+  facePlane([764, 1361.5], [620, 1361.5], 113, 188, MAT.screen, G.furniture);
 
   // 吧檯（L 形 255 寬）
   block(1497, 1750, 750, 797, 4, 102, MAT.white); block(1695, 1750, 797, 898, 4, 102, MAT.white);
@@ -834,8 +833,6 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   block(492, 703, 1439, 1500, 105, 109, MAT.white);
   textPanel('天成醫療體系', 'Ten-Chen Medical Group', 'brand', [497, 1500], [698, 1500], 35, 90);
   block(495, 700, 1498, 1500.5, 15, 20, MAT.gold, G.furniture, false);
-  // 接待櫃右側三根白柱
-  [735, 785, 835].forEach(x => block(x - 12, x + 12, 1474, 1498, 4, FASCIA_H0, MAT.white));
 
   // 儲藏室內
   block(1560, 1778, 922, 980, 4, 200, MAT.lightWood);   // 包包櫃、衣櫃
@@ -879,7 +876,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   const COLL = WALL_RECTS.map(r => [wx(r[0]), wx(r[1]), wz(r[2]), wz(r[3])]);
   // 主要家具也擋一下
   [[530, 770, 765, 865], [495, 700, 1442, 1500], [1497, 1750, 750, 797], [1695, 1750, 797, 898], [1162, 1247, 895, 1292],
-   [1266, 1429, 1121, 1286], [72, 180, 1002, 1208], [805, 1000, 402, 498], [1562, 1768, 392, 498], [340, 540, 395, 490], [405, 610, 1160, 1255], [200, 380, 150, 215]]
+   [1266, 1429, 1121, 1286], [72, 180, 1042, 1248], [805, 1000, 402, 498], [1562, 1768, 392, 498], [340, 540, 395, 490], [430, 635, 1200, 1295], [200, 380, 150, 215]]
     .forEach(r => COLL.push([wx(r[0]), wx(r[1]), wz(r[2]), wz(r[3])]));
   const R = 0.28;
   function collide(p) {
