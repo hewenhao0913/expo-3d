@@ -116,7 +116,7 @@
     <button data-v="zAI">AI 醫療</button>
     <button data-v="zLC">長照 BODYGO</button>
     <button data-v="zPH">精準大健康</button>
-    <button data-v="zSO">沙發・吧檯</button>
+    <button data-v="zSO">吧檯</button>
     <button data-v="zST">舞台 LED 牆</button>
   </div>
 </nav>
@@ -459,9 +459,9 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     if (IMG[f.code]) setFaceImage(f, IMG[f.code]);
   });
 
-  // ---------- LED 電視牆 600×200 ----------
+  // ---------- LED 電視牆 300×150（2026-11-16 文董確認尺寸） ----------
   {
-    const c = cvs(1500, 500, (ctx, w, h) => {
+    const c = cvs(1200, 600, (ctx, w, h) => {
       const g = ctx.createLinearGradient(0, 0, w, h);
       g.addColorStop(0, '#0a1f5c'); g.addColorStop(.55, '#1557b0'); g.addColorStop(1, '#22a3c9');
       ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
@@ -471,11 +471,11 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
         ctx.moveTo(0, y); ctx.bezierCurveTo(w * .3, y - 120, w * .6, y + 140, w, y - 40); ctx.stroke();
       }
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
-      ctx.font = `700 120px ${FONT}`; ctx.fillText('天成醫療體系', w / 2, h / 2 - 50);
-      ctx.font = `400 46px ${FONT}`; ctx.fillStyle = 'rgba(255,255,255,.85)';
+      ctx.font = `700 120px ${FONT}`; ctx.fillText('天成醫療體系', w / 2, h / 2 - 60);
+      ctx.font = `400 40px ${FONT}`; ctx.fillStyle = 'rgba(255,255,255,.85)';
       ctx.fillText('Ten-Chen Medical Group ・ 打造智慧醫療健康城', w / 2, h / 2 + 60);
       ctx.font = `500 30px ${FONT}`; ctx.fillStyle = 'rgba(255,255,255,.6)';
-      ctx.fillText('LED 電視牆 600 × 200 cm', w / 2, h - 50);
+      ctx.fillText('LED 電視牆 300 × 150 cm', w / 2, h - 50);
     });
     const tex = canvasTex(c);
     const mat = new T.MeshStandardMaterial({ map: tex, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.9, roughness: 0.3 });
@@ -483,14 +483,14 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     const d = 11 / Math.SQRT2;
     const cxm = (LED_A[0] + LED_B[0]) / 2, cym = (LED_A[1] + LED_B[1]) / 2;
     const ux = (LED_B[0] - LED_A[0]) / 622.3, uy = (LED_B[1] - LED_A[1]) / 622.3;
-    const a = [cxm - ux * 300 + d, cym - uy * 300 + d], b = [cxm + ux * 300 + d, cym + uy * 300 + d];
-    const led = facePlane(a.map(v => v + 1), b.map(v => v + 1), 60, 260, mat, G.walls);
-    led.userData.face = { code: 'E1', zone: '舞台區', name: 'LED 電視牆', w: 600, h: 200 };
+    const a = [cxm - ux * 150 + d, cym - uy * 150 + d], b = [cxm + ux * 150 + d, cym + uy * 150 + d];
+    const led = facePlane(a.map(v => v + 1), b.map(v => v + 1), 90, 240, mat, G.walls);
+    led.userData.face = { code: 'E1', zone: '舞台區', name: 'LED 電視牆', w: 300, h: 150 };
     posterMeshes.push(led);
     // 金色背板（整面斜牆）＋ LED 黑框
     const off = (k, s) => [cxm + ux * s + k, cym + uy * s + k];
     facePlane(off(d * 0.95, -311), off(d * 0.95, 311), 4, 320, new T.MeshStandardMaterial({ map: canvasTex(goldCanvas(622, 316, null)), roughness: 0.6 }), G.walls);
-    facePlane(off(d + 0.5, -306), off(d + 0.5, 306), 54, 266, MAT.black, G.walls);
+    facePlane(off(d + 0.5, -156), off(d + 0.5, 156), 84, 246, MAT.black, G.walls);
     // 舞台兩側金色板（儲藏室南牆外側、東牆外側）：建築照片＋直書標語
     facePlane([1250, 1501], [1360, 1501], 4, 266, new T.MeshStandardMaterial({ map: canvasTex(goldCanvas(110, 262, '醫養合一大健康')), roughness: 0.6 }), G.walls);
     facePlane([1801, 1060], [1801, 900], 4, 266, new T.MeshStandardMaterial({ map: canvasTex(goldCanvas(160, 262, '智慧醫療')), roughness: 0.6 }), G.walls);
@@ -804,8 +804,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   massageChair(850, 175); massageChair(950, 175);
   deskBox(1221, 1283, 128, 182, 90, MAT.white);
   // 握力肌力檢測、AR 樂齡運動體感（儀器示意）
-  block(1135, 1205, 140, 190, 4, 100, MAT.white); monitor(1170, 200, 50, 30, 100, 0);
-  monitor(1340, 200, 120, 70, 90, 0); block(1300, 1380, 210, 250, 4, 10, MAT.metal);
+  block(1135, 1205, 140, 190, 4, 100, MAT.white);
   // 青埔壹號苑 模型展示 200×100
   deskBox(805, 1000, 402, 498, 85, MAT.white);
   block(820, 985, 410, 490, 85, 87, new T.MeshStandardMaterial({ color: 0x8fbf6a, roughness: 1 }));
@@ -814,8 +813,9 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   // 可移動式展示活動桌 210×110
   deskBox(1562, 1768, 392, 498, 90, MAT.lightWood);
   monitor(1665, 445, 70, 42, 90, 0);
-  // 兩台電視（金色年代牆前）
-  monitor(1080, 230, 110, 63, 95, 0); monitor(1210, 300, 110, 63, 95, 0);
+  // 立式螢幕兩台（2026-11-16 文董指示：原本四台改成一橫一直）
+  monitor(1080, 240, 110, 63, 95, 0);   // 橫式
+  monitor(1360, 240, 63, 110, 70, 0);   // 直式
 
   // 精準大健康
   // （2026-11-16 依廠商新圖：整區隨老闆那面牆往南移 80，拿掉洽談圓桌＋4 椅）
@@ -833,14 +833,6 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   block(1497, 1750, 750, 797, 4, 102, MAT.white); block(1695, 1750, 797, 898, 4, 102, MAT.white);
   block(1493, 1754, 746, 801, 102, 106, MAT.lightWood); block(1691, 1754, 801, 898, 102, 106, MAT.lightWood);
   textPanel('天成醫療體系', 'Ten-Chen Medical Group', 'brand', [1500, 801], [1690, 801], 40, 85);
-
-  // 貴妃椅沙發 ×2（背靠儲藏室西牆，面向西）
-  function chaise(y0, y1) {
-    block(1162, 1245, y0, y1, 4, 45, MAT.sofa);
-    block(1222, 1247, y0, y1, 45, 76, MAT.sofa);
-    block(1206, 1222, y0 + 40, y0 + 100, 45, 75, MAT.red);
-  }
-  chaise(895, 1088); chaise(1098, 1292);
 
   // 接待櫃 205（2026-11-16 依廠商新圖：移到老闆那面牆東端、入口旁，正面金色）
   block(800, 1005, 1442, 1498, 4, 105, MAT.white);
@@ -872,10 +864,9 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   label('精準大健康', null, 420, 1200, 230, 2.6);
   label('中央洽談區', null, 650, 815, 170, 2.0);
   label('吧檯', null, 1620, 780, 170, 1.3);
-  label('貴妃椅沙發', null, 1120, 1090, 140, 1.7);
   label('接待櫃', null, 900, 1470, 170, 1.4);
   label('儲藏室', null, 1500, 1050, 380, 1.7);
-  label('舞台區', 'LED 600×200', 1680, 1380, 300, 1.9);
+  label('舞台區', 'LED 300×150', 1680, 1380, 300, 1.9);
   label('大會柱子', null, 1350, 1200, 950, 1.6);
   FACES.forEach(f => {
     const ax = f.a[0], ay = f.a[1], bx = f.b[0], by = f.b[1];
@@ -888,7 +879,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   // ---------- 碰撞（走進去模式） ----------
   const COLL = WALL_RECTS.map(r => [wx(r[0]), wx(r[1]), wz(r[2]), wz(r[3])]);
   // 主要家具也擋一下
-  [[530, 770, 765, 865], [800, 1005, 1442, 1500], [1497, 1750, 750, 797], [1695, 1750, 797, 898], [1162, 1247, 895, 1292],
+  [[530, 770, 765, 865], [800, 1005, 1442, 1500], [1497, 1750, 750, 797], [1695, 1750, 797, 898],
    [1266, 1429, 1121, 1286], [72, 180, 1122, 1328], [805, 1000, 402, 498], [1562, 1768, 392, 498], [430, 635, 1280, 1375], [200, 380, 150, 215]]
     .forEach(r => COLL.push([wx(r[0]), wx(r[1]), wz(r[2]), wz(r[3])]));
   const R = 0.28;
@@ -1009,7 +1000,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     zLC: () => enterWalk(1120, 760, 1500, 200, 150),
     zPH: () => enterWalk(620, 980, 120, 1360, 140),
     zST: () => enterWalk(2060, 1760, 1580, 1280, 170),
-    zSO: () => enterWalk(820, 1080, 1260, 960, 160),
+    zSO: () => enterWalk(1150, 1050, 1620, 790, 130),
   };
 
   // ---------- 模式與 UI ----------
