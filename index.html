@@ -453,6 +453,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     { code: 'C4', zone: '精準大健康', name: '背面・走道側（我創業 我實踐）', w: 490, h: 270, a: [49, 930], b: [49, 1420] },
     { code: 'D1', zone: '儲藏室外牆', name: '健康台灣深耕計畫（北面）', w: 350, h: 320, a: [1670, 899], b: [1320, 899] },
     { code: 'D2', zone: '儲藏室外牆', name: '天成精準大健康・四大主軸（西面）', w: 400, h: 320, a: [1249, 970], b: [1249, 1370] },
+    { code: 'D3', zone: '儲藏室外牆', name: '西北斜角（吧檯後方，D1 右邊）', w: 99, h: 320, a: [1319, 896], b: [1248, 967] },
   ];
   const posterMeshes = [];
 
@@ -465,9 +466,10 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
       c.setLineDash([18, 12]); c.strokeStyle = '#9aa6b4'; c.lineWidth = 6;
       c.strokeRect(18, 18, w - 36, h - 36);
       c.textAlign = 'center'; c.textBaseline = 'middle';
-      c.fillStyle = '#5b6878'; c.font = `700 120px ${FONT}`; c.fillText(f.code, w / 2, h / 2 - 70);
-      c.font = `500 46px ${FONT}`; c.fillText(`${f.w} × ${f.h} cm`, w / 2, h / 2 + 30);
-      c.fillStyle = '#8692a0'; c.font = `400 36px ${FONT}`; c.fillText('設計中・待補大圖', w / 2, h / 2 + 95);
+      const z = Math.min(1, (w - 40) / 340);   // 窄牆（例如 D3 99 寬）字跟著縮
+      c.fillStyle = '#5b6878'; c.font = `700 ${120 * z}px ${FONT}`; c.fillText(f.code, w / 2, h / 2 - 70 * z);
+      c.font = `500 ${46 * z}px ${FONT}`; c.fillText(`${f.w} × ${f.h} cm`, w / 2, h / 2 + 30 * z);
+      c.fillStyle = '#8692a0'; c.font = `400 ${36 * z}px ${FONT}`; c.fillText('設計中・待補大圖', w / 2, h / 2 + 95 * z);
     });
   }
   function posterMaterial(tex) {
