@@ -63,6 +63,10 @@
     border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; line-height: 1.55; max-width: 260px;
   }
   #tip b { color: var(--gold) }
+  #lightbox { position: fixed; inset: 0; z-index: 50; background: rgba(10,12,15,.9); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; gap: 10px; cursor: zoom-out }
+  #lightbox img { max-width: 100%; max-height: calc(100% - 60px); object-fit: contain; box-shadow: 0 6px 30px rgba(0,0,0,.5) }
+  #lightbox .lb-head { color: #e8ecf2; font-size: 14px; display: flex; gap: 12px; align-items: center; max-width: 100% }
+  #lightbox button { background: #2a2f37; color: #fff; border: 0; border-radius: 6px; width: 32px; height: 32px; font-size: 16px; cursor: pointer; flex: none }
   #tip span { color: var(--muted); font-variant-numeric: tabular-nums }
   #toast {
     left: 50%; transform: translateX(-50%); bottom: calc(62px + env(safe-area-inset-bottom, 0px)); max-width: min(560px, calc(100% - 32px));
@@ -131,7 +135,7 @@
 </div>
 
 <div class="panel" id="legend">
-  <b>換大圖</b><br>雙擊牆面選圖，或把圖片拖到牆上預覽。金色標籤是牆面編號。
+  <b>看原圖</b>　點一下牆面，另開視窗顯示整張原圖。<br><b>換大圖</b>　雙擊牆面選圖，或把圖片拖到牆上預覽。金色標籤是牆面編號。
 </div>
 
 <div class="panel" id="help"></div>
@@ -503,7 +507,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
         const k = Math.min(W / img.width, H / img.height), dw = img.width * k, dh = img.height * k;
         ctx.drawImage(img, (W - dw) / 2, (H - dh) / 2, dw, dh);
         const t = new T.CanvasTexture(c); t.needsUpdate = true;
-        f.mesh.material.dispose(); f.mesh.material = posterMaterial(t); res(true);
+        f.mesh.material.dispose(); f.mesh.material = posterMaterial(t); f.src = src; res(true);
       };
       img.onerror = () => res(false);
       img.src = src;
@@ -936,16 +940,15 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   // 精準大健康（v4）
   deskBox(72, 142, 985, 1085, 70, MAT.white);   // 展示桌 寬 100×深 70×高 70（乳房攝影模型，2026-11-22）
   block(142, 142.8, 985, 1085, 22, 26, MAT_PINK_LINE, G.furniture, false);
-  { // 乳房衛教模型：白色底座＋膚色胸部半身模型（兩個乳房朝向攤位內），旁邊粉紅絲帶牌
+  { // 乳房衛教模型（平放在桌上，乳房朝上）：白色底座＋膚色胸部模型，底座前緣粉紅線
     const SKIN = new T.MeshStandardMaterial({ color: 0xf0c4a4, roughness: 0.6 });
     block(84, 132, 1003, 1067, 70, 73, MAT.white);                 // 底座
-    block(102, 106, 1031, 1039, 73, 86, MAT.metal);                // 支架
-    block(94, 108, 1007, 1063, 86, 124, SKIN);                     // 胸部半身
+    block(90, 126, 1008, 1062, 73, 79, SKIN);                      // 胸部模型（平躺）
     [1022, 1048].forEach(y => {
       const b = new T.Mesh(new T.SphereGeometry(m(10), 24, 16, 0, Math.PI * 2, 0, Math.PI / 2), SKIN);
-      b.rotation.z = -Math.PI / 2; b.position.set(wx(108), m(103), wz(y)); b.castShadow = true; G.furniture.add(b);
+      b.position.set(wx(108), m(79), wz(y)); b.castShadow = true; G.furniture.add(b);
       const n = new T.Mesh(new T.SphereGeometry(m(1.6), 12, 8), new T.MeshStandardMaterial({ color: 0xc98a78, roughness: 0.6 }));
-      n.position.set(wx(118), m(103), wz(y)); G.furniture.add(n);
+      n.position.set(wx(108), m(89), wz(y)); G.furniture.add(n);
     });
     facePlane([132.5, 1067], [132.5, 1003], 70.5, 72.5, MAT_PINK_LINE, G.furniture);   // 底座前緣粉紅線
   }
@@ -1268,7 +1271,11 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     if (!drag) return;
     const moved = Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy);
     const quick = performance.now() - drag.t < 450;
-    if (moved < 6 && quick && drag.b === 0 && state.mode === 'walk') {
+    const wallHit = moved < 6 && quick && drag.b === 0 ? posterHit(e) : null;
+    if (wallHit && wallHit.userData.face.src) {
+      const f = wallHit.userData.face;
+      clearTimeout(clickTimer); clickTimer = setTimeout(() => openOriginal(f), 260);   // 260ms 內再點一下就當雙擊（換圖）
+    } else if (moved < 6 && quick && drag.b === 0 && state.mode === 'walk') {
       const p = floorHit(e);
       if (p && !blockedAt(p.x, p.z) && p.distanceTo(walk.pos) < 40) { walk.tPos.set(p.x, EYE, p.z); collide(walk.tPos); }
     }
@@ -1317,7 +1324,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     const hit = posterHit(e);
     if (hit) {
       const f = hit.userData.face;
-      ui.tip.innerHTML = `<b>${f.code}</b>　${f.zone}<br>${f.name}<br><span>${f.w} × ${f.h} cm</span>`;
+      ui.tip.innerHTML = `<b>${f.code}</b>　${f.zone}<br>${f.name}<br><span>${f.w} × ${f.h} cm${f.src ? '・點一下看原圖' : ''}</span>`;
       ui.tip.style.transform = `translate(${e.clientX + 16}px, ${e.clientY + 14}px)`;
       ui.tip.hidden = false;
       canvas.style.cursor = 'pointer';
@@ -1337,6 +1344,34 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 
   // ---------- 換大圖：雙擊牆面選檔，或把圖片拖到牆上 ----------
   const fileIn = document.getElementById('file');
+  // ---------- 點牆面：另開視窗顯示原圖 ----------
+  let clickTimer = 0;
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  function openOriginal(f) {
+    const title = `${f.code}　${f.zone}・${f.name}（${f.w} × ${f.h} cm）`;
+    let win = null;
+    try { win = window.open('', '_blank'); } catch (err) { win = null; }
+    if (win && win.document) {
+      win.document.write(`<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title>
+<style>html,body{margin:0;background:#15181d;color:#e8ecf2;font:14px/1.5 -apple-system,"PingFang TC","Noto Sans TC",sans-serif}
+header{position:sticky;top:0;padding:10px 16px;background:rgba(21,24,29,.92);border-bottom:1px solid #2a2f37}
+header span{color:#9aa4b2;margin-left:8px}
+main{display:flex;justify-content:center;padding:16px}
+img{max-width:100%;max-height:calc(100vh - 80px);object-fit:contain;cursor:zoom-in;box-shadow:0 6px 30px rgba(0,0,0,.5)}
+img.full{max-width:none;max-height:none;cursor:zoom-out}</style></head>
+<body><header>${esc(title)}<span>點圖片可切換原尺寸</span></header><main><img src="${f.src}" alt="${esc(f.name)}" onclick="this.classList.toggle('full')"></main></body></html>`);
+      win.document.close();
+    } else showLightbox(f, title);   // 瀏覽器擋掉新視窗時，改在頁面上放大顯示
+  }
+  function showLightbox(f, title) {
+    const box = document.createElement('div'); box.id = 'lightbox';
+    box.innerHTML = `<div class="lb-head">${esc(title)}<button aria-label="關閉">✕</button></div><img src="${f.src}" alt="${esc(f.name)}">`;
+    box.addEventListener('click', () => box.remove());
+    const onKey = ev => { if (ev.key === 'Escape') { box.remove(); removeEventListener('keydown', onKey); } };
+    addEventListener('keydown', onKey);
+    document.body.appendChild(box);
+  }
+
   let pendingFace = null;
   function applyFile(face, file) {
     if (!file || !/^image\//.test(file.type)) { toast('請選擇圖片檔（JPG 或 PNG）'); return; }
@@ -1346,6 +1381,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
       : '這張圖讀不出來，換一張試試'));
   }
   canvas.addEventListener('dblclick', e => {
+    clearTimeout(clickTimer);   // 雙擊是換圖，不開原圖
     const hit = posterHit(e);
     if (!hit) return;
     const f = hit.userData.face;
