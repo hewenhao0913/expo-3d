@@ -826,16 +826,16 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     const along = x1 - x0 > y1 - y0, L = along ? x1 - x0 : y1 - y0;
     const pm = (t, sub) => new T.MeshStandardMaterial({ map: canvasTex(logoCanvas(kind === 'goldbox' ? 'goldboxR' : kind, t, sub, L)), roughness: 0.5 });
     if (along) {   // 東西向：外側在北或南由呼叫端決定（outTxt 給 y1 那面）
-      facePlane([x1, y0 - 0.6], [x0, y0 - 0.6], 272, 316, pm(inTxt), G.fascia);
+      facePlane([x1, y0 - 0.6], [x0, y0 - 0.6], 272, 316, pm(inTxt, outSub), G.fascia);
       facePlane([x0, y1 + 0.6], [x1, y1 + 0.6], 272, 316, pm(outTxt, outSub), G.fascia);
     } else {       // 南北向：x0 那面朝西（外）、x1 那面朝東（內）
       facePlane([x0 - 0.6, y0], [x0 - 0.6, y1], 272, 316, pm(outTxt, outSub), G.fascia);
-      facePlane([x1 + 0.6, y1], [x1 + 0.6, y0], 272, 316, pm(inTxt), G.fascia);
+      facePlane([x1 + 0.6, y1], [x1 + 0.6, y0], 272, 316, pm(inTxt, outSub), G.fascia);
     }
   }
   topBox(348, 680, 1392, 1428, 'pinkbox', '醫療科技 CEO 張育美', '精準大健康');   // 老闆那面牆頂
   topBox(42, 78, 390, 705, 'bluebox', 'AI 醫療', 'AI 醫療');                      // AI 醫療左牆頂
-  topBox(810, 1380, 92, 128, 'goldbox', '長照 BODY GO', '長照 BODY GO');          // 長照上牆頂
+  topBox(810, 1380, 92, 128, 'goldbox', '長照是國際化•科技化•產業化的', '長照是國際化•科技化•產業化的', 'Long-Term Care: Internationalized • Technology-Driven • Industrialized');          // 長照上牆頂
   // 喇叭（楣板轉角上方、儲藏室斜角）
   [[826, 110, FASCIA_H1], [FE, FC[1], FASCIA_H1], [FC[0], 1490, FASCIA_H1], [1292, 942, 320]].forEach(([x, y, h]) => {
     block(x - 14, x + 14, y - 14, y + 14, h, h + 42, MAT.black, G.fascia);
@@ -893,9 +893,11 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   }
   function screenCanvasMat(draw, w, h) { const t = canvasTex(cvs(w, h, draw)); return new T.MeshStandardMaterial({ map: t, emissive: 0xffffff, emissiveMap: t, emissiveIntensity: 0.7, roughness: 0.3 }); }
 
-  // 中央洽談區：長桌 185×70 + 6 椅（v4 平面圖）
-  deskBox(655, 840, 865, 935, 76, MAT.white);
-  [685, 747, 810].forEach(x => { chair(x, 838, [0, 1], MAT.chairWhite); chair(x, 962, [0, -1], MAT.chairWhite); });
+  // 中央洽談區（2026-11-22）：兩組圓形洽談桌（直徑 80）＋各 4 椅
+  [[640, 900], [860, 900]].forEach(([cx, cy]) => {
+    roundTable(cx, cy, 40, 75);
+    [45, 135, 225, 315].forEach(d => { const t = d * Math.PI / 180; chairToward(cx + 68 * Math.cos(t), cy + 68 * Math.sin(t), cx, cy, MAT.chairWhite); });
+  });
 
   // AI 醫療（2026-11-22 依新版 A1、A2 海報）：螢幕位置照海報上畫的位置與大小
   //   A1：感應式電子床頭卡（最左）、55 吋 Hospital TV（中間偏左）＋下方小櫃；A2：65 吋直立「90 秒」觸控螢幕
@@ -920,20 +922,20 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   facePlane([371, 125.5], [452, 125.5], 78, 243, cropMat('A2', .5675, .72, 103 / 1019, 725 / 1019, .35), G.furniture);
 
   // 長照 BODYGO（v4）：握力肌力檢測（直式螢幕）、兩個小展示桌、AR 樂齡運動體感（橫式螢幕）、青埔模型、活動展示桌
-  monitor(1100, 175, 63, 110, 70, 0);    // 直式
-  block(1163, 1215, 123, 175, 4, 100, MAT.white); block(1231, 1285, 123, 175, 4, 100, MAT.white);
-  monitor(1350, 175, 110, 63, 95, 0);    // 橫式
+  // 2026-11-22：螢幕和桌子排成一排，以 B1／B5 交界（x=1400）為中心、離牆 1 米（y=220）
+  monitor(1215, 220, 63, 110, 70, 0);    // 直式（握力肌力檢測）
+  deskBox(1267, 1367, 185, 255, 70, MAT.white); deskBox(1387, 1487, 185, 255, 70, MAT.white);   // 展示桌 100×70×70 ×2
+  monitor(1562, 220, 110, 63, 95, 0);    // 橫式（AR 樂齡體感）
   deskBox(805, 1000, 402, 498, 85, MAT.white);   // 青埔壹號苑 模型展示 200×100
   block(820, 985, 410, 490, 85, 87, new T.MeshStandardMaterial({ color: 0x8fbf6a, roughness: 1 }));
   [[850, 430, 35], [900, 450, 55], [950, 430, 28], [880, 470, 22], [950, 470, 40]].forEach(b => block(b[0] - 15, b[0] + 15, b[1] - 12, b[1] + 12, 87, 87 + b[2], MAT.chairWhite));
   block(808, 997, 405, 495, 87, 150, MAT.glass).castShadow = false;
-  deskBox(1600, 1670, 340, 440, 90, MAT.white); deskBox(1600, 1670, 440, 540, 90, MAT.white);   // 展示活動桌 70×200
 
   // 精準大健康（v4）
-  deskBox(72, 142, 935, 1035, 90, MAT.white); deskBox(72, 142, 1035, 1135, 90, MAT.white);   // 展示活動桌 70×200（乳房攝影模型）
-  block(142, 142.8, 935, 1135, 22, 26, MAT_PINK_LINE, G.furniture, false);
-  { const sp = new T.Mesh(new T.SphereGeometry(.16, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2), MAT.pinkSolid); sp.position.set(wx(107), .9, wz(990)); sp.castShadow = true; G.furniture.add(sp);
-    block(90, 125, 1070, 1105, 90, 140, MAT.white); }
+  deskBox(72, 142, 985, 1085, 70, MAT.white);   // 展示桌 寬 100×深 70×高 70（乳房攝影模型，2026-11-22）
+  block(142, 142.8, 985, 1085, 22, 26, MAT_PINK_LINE, G.furniture, false);
+  { const sp = new T.Mesh(new T.SphereGeometry(.14, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2), MAT.pinkSolid); sp.position.set(wx(107), .7, wz(1012)); sp.castShadow = true; G.furniture.add(sp);
+    block(92, 122, 1045, 1075, 70, 115, MAT.white); }
   deskBox(410, 510, 1252, 1322, 90, MAT.white); deskBox(510, 610, 1252, 1322, 90, MAT.white);   // 展示活動桌 200×70（印表機）＋ 2 椅
   block(560, 600, 1265, 1300, 90, 108, MAT.chairWhite); block(565, 595, 1270, 1295, 108, 110, MAT.black);
   block(440, 485, 1272, 1300, 90, 92, MAT.black);
@@ -1012,8 +1014,8 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   // ---------- 碰撞（走進去模式） ----------
   const COLL = WALL_RECTS.map(r => [wx(r[0]), wx(r[1]), wz(r[2]), wz(r[3])]);
   // 主要家具也擋一下（吧檯弧形用三塊近似、儲藏室斜角兩塊）
-  [[655, 840, 865, 935], [1250, 1340, 1447, 1500], [1747, 1800, 900, 1050], [1266, 1429, 1121, 1286],
-   [72, 142, 935, 1135], [805, 1000, 402, 498], [1600, 1670, 340, 540], [410, 610, 1252, 1322], [235, 435, 126, 196], [71, 101, 445, 525],
+  [[572, 708, 832, 968], [792, 928, 832, 968], [1250, 1340, 1447, 1500], [1747, 1800, 900, 1050], [1266, 1429, 1121, 1286],
+   [72, 142, 985, 1085], [805, 1000, 402, 498], [1184, 1617, 185, 255], [410, 610, 1252, 1322], [235, 435, 126, 196], [71, 101, 445, 525],
    [1145, 1195, 900, 958], [1180, 1250, 830, 905], [1240, 1305, 798, 845], [1255, 1290, 935, 975], [1285, 1325, 905, 945]]
     .forEach(r => COLL.push([wx(r[0]), wx(r[1]), wz(r[2]), wz(r[3])]));
   const R = 0.28;
