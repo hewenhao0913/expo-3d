@@ -406,10 +406,10 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   // ---------- 舞台區：LED 斜牆前，深 180 的梯形台＋弧形上層（v4 平面圖／廠商圖） ----------
   const STAGE_U = [(LED_B[0] - LED_A[0]) / 622.25, (LED_B[1] - LED_A[1]) / 622.25];
   const STAGE_N = [Math.SQRT1_2, Math.SQRT1_2];   // 朝東南（朝觀眾）
-  // 2026-11-22：舞台整塊 30cm（照平面圖梯形，深 180），只有「面對舞台的左邊」（西南側、y=1500 那條邊）有樓梯，正面和右邊沒有
-  //   樓梯寬 90（x 1500–1590），兩階 10cm、20cm，再上 30cm 台面
-  const STAIRS = [[1500, 1590, 1470, 1500, 10], [1500, 1590, 1440, 1470, 20]];
-  const STAGE = [[1360, 1500], [1500, 1500], [1500, 1440], [1590, 1440], [1590, 1500], [1615, 1500], [1800, 1315], [1800, 1060]];
+  // 2026-11-22：舞台整塊 30cm（照平面圖梯形，深 180）。樓梯依 v4 平面圖：只在「面對舞台的左邊」（y=1500 那條邊），
+  //   是一整條深 30cm 的踏階（15cm），從 LED 牆延伸到 x≈1529，尾端斜切；正面和右邊沒有樓梯
+  const STEP = [[1360, 1500], [1389, 1471], [1529, 1471], [1503, 1500]];
+  const STAGE = [[1389, 1471], [1529, 1471], [1503, 1500], [1615, 1500], [1800, 1315], [1800, 1060]];
   function clipPoly(pts, f) {
     const out = [];
     for (let i = 0; i < pts.length; i++) {
@@ -428,8 +428,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     return c;
   }
   function stageFloor(x, y) {   // 平面座標 → 地板高度（cm）
-    const st = STAIRS.find(r => x >= r[0] && x <= r[1] && y >= r[2] && y <= r[3]);
-    return st ? st[4] : inPoly(x, y, STAGE) ? 30 : 0;
+    return inPoly(x, y, STEP) ? 15 : inPoly(x, y, STAGE) ? 30 : 0;
   }
   function polyMesh(P, h0, h1, mats, parent) {   // 平面多邊形擠出成實體
     const sh = new T.Shape();
@@ -444,16 +443,9 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     const top = new T.MeshStandardMaterial({ color: 0xeeeeec, roughness: 0.6, side: T.DoubleSide });
     const edge = new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5, side: T.DoubleSide });
     polyMesh(STAGE, 0, 34, [top, edge]);
+    polyMesh(STEP, 0, 19, [top, edge]);
     const nose = new T.MeshStandardMaterial({ color: 0x2a2f37, roughness: 0.6 });
-    STAIRS.forEach(([x0, x1, y0, y1, h]) => {
-      block(x0, x1, y0, y1, 0, h + 4, edge, G.walls);
-      block(x0, x1, y1 - 2, y1 + 0.3, h + 2, h + 4.3, nose, G.walls);   // 階梯前緣深色止滑條
-    });
-    // 樓梯外側扶手（靠舞台正面那一側，x=1590）
-    [[1595, 1497], [1595, 1440]].forEach(([x, y]) => cyl(x, y, 2, 4, y > 1480 ? 104 : 124, MAT.metal, G.walls, 10));
-    { const a0 = [wx(1595), m(104), wz(1497)], a1 = [wx(1595), m(124), wz(1440)];
-      const L = Math.hypot(a1[1] - a0[1], a1[2] - a0[2]), rail = new T.Mesh(new T.CylinderGeometry(.02, .02, L, 10), MAT.metal);
-      rail.position.set(a0[0], (a0[1] + a1[1]) / 2, (a0[2] + a1[2]) / 2); rail.rotation.x = Math.atan2(a1[2] - a0[2], a1[1] - a0[1]); G.walls.add(rail); }
+    block(1378, 1503, 1497, 1500.3, 17, 19.3, nose, G.walls);   // 踏階前緣深色止滑條
   }
 
   // ---------- 大會柱子（會場結構柱，通到天花板） ----------
