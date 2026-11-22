@@ -908,9 +908,11 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     t.repeat.set(u1 - u0, yb - yt); t.offset.set(u0, 1 - yb);
     return new T.MeshStandardMaterial({ map: t, roughness: 0.35, emissive: 0xffffff, emissiveMap: t, emissiveIntensity: glow || 0.25 });
   }
-  deskBox(235, 335, 126, 196, 90, MAT.white); deskBox(335, 435, 126, 196, 90, MAT.white);
-  block(235, 435, 196.2, 197, 22, 26, MAT_BLUE, G.furniture, false);
-  block(245, 285, 138, 173, 90, 108, MAT.chairWhite); block(250, 280, 143, 168, 108, 110, MAT.black);   // 印表機（移到左側，不擋 65 吋螢幕）
+  // 2026-11-22：展示桌左移，離 A1 牆約一人寬（70 cm）、離 A2 牆 1 米，不擋 65 吋螢幕；桌子和牆中間放 2 張椅子（面向訪客）
+  deskBox(140, 240, 221, 291, 90, MAT.white); deskBox(240, 340, 221, 291, 90, MAT.white);
+  block(140, 340, 291.2, 292, 22, 26, MAT_BLUE, G.furniture, false);
+  block(150, 190, 236, 271, 90, 108, MAT.chairWhite); block(155, 185, 241, 266, 108, 110, MAT.black);   // 印表機（左側）
+  [190, 290].forEach(x => chair(x, 180, [0, 1], MAT.chairWhite));
   // A1 牆面 x=71，視線朝西；a 端 y=730 是海報左邊
   block(71, 74, 645, 681, 147, 176, MAT.white);                                                     // 感應式電子床頭卡（海報 u .08–.14）
   facePlane([74.5, 681], [74.5, 645], 147, 176, cropMat('A1', .08, .14, 308 / 886, 403 / 886), G.furniture);
@@ -934,8 +936,19 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   // 精準大健康（v4）
   deskBox(72, 142, 985, 1085, 70, MAT.white);   // 展示桌 寬 100×深 70×高 70（乳房攝影模型，2026-11-22）
   block(142, 142.8, 985, 1085, 22, 26, MAT_PINK_LINE, G.furniture, false);
-  { const sp = new T.Mesh(new T.SphereGeometry(.14, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2), MAT.pinkSolid); sp.position.set(wx(107), .7, wz(1012)); sp.castShadow = true; G.furniture.add(sp);
-    block(92, 122, 1045, 1075, 70, 115, MAT.white); }
+  { // 乳房衛教模型：白色底座＋膚色胸部半身模型（兩個乳房朝向攤位內），旁邊粉紅絲帶牌
+    const SKIN = new T.MeshStandardMaterial({ color: 0xf0c4a4, roughness: 0.6 });
+    block(84, 132, 1003, 1067, 70, 73, MAT.white);                 // 底座
+    block(102, 106, 1031, 1039, 73, 86, MAT.metal);                // 支架
+    block(94, 108, 1007, 1063, 86, 124, SKIN);                     // 胸部半身
+    [1022, 1048].forEach(y => {
+      const b = new T.Mesh(new T.SphereGeometry(m(10), 24, 16, 0, Math.PI * 2, 0, Math.PI / 2), SKIN);
+      b.rotation.z = -Math.PI / 2; b.position.set(wx(108), m(103), wz(y)); b.castShadow = true; G.furniture.add(b);
+      const n = new T.Mesh(new T.SphereGeometry(m(1.6), 12, 8), new T.MeshStandardMaterial({ color: 0xc98a78, roughness: 0.6 }));
+      n.position.set(wx(118), m(103), wz(y)); G.furniture.add(n);
+    });
+    facePlane([132.5, 1067], [132.5, 1003], 70.5, 72.5, MAT_PINK_LINE, G.furniture);   // 底座前緣粉紅線
+  }
   deskBox(410, 510, 1252, 1322, 90, MAT.white); deskBox(510, 610, 1252, 1322, 90, MAT.white);   // 展示活動桌 200×70（印表機）＋ 2 椅
   block(560, 600, 1265, 1300, 90, 108, MAT.chairWhite); block(565, 595, 1270, 1295, 108, 110, MAT.black);
   block(440, 485, 1272, 1300, 90, 92, MAT.black);
@@ -1015,7 +1028,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   const COLL = WALL_RECTS.map(r => [wx(r[0]), wx(r[1]), wz(r[2]), wz(r[3])]);
   // 主要家具也擋一下（吧檯弧形用三塊近似、儲藏室斜角兩塊）
   [[572, 708, 832, 968], [792, 928, 832, 968], [1250, 1340, 1447, 1500], [1747, 1800, 900, 1050], [1266, 1429, 1121, 1286],
-   [72, 142, 985, 1085], [805, 1000, 402, 498], [1184, 1617, 185, 255], [410, 610, 1252, 1322], [235, 435, 126, 196], [71, 101, 445, 525],
+   [72, 142, 985, 1085], [805, 1000, 402, 498], [1184, 1617, 185, 255], [410, 610, 1252, 1322], [140, 340, 221, 291], [71, 101, 445, 525],
    [1145, 1195, 900, 958], [1180, 1250, 830, 905], [1240, 1305, 798, 845], [1255, 1290, 935, 975], [1285, 1325, 905, 945]]
     .forEach(r => COLL.push([wx(r[0]), wx(r[1]), wz(r[2]), wz(r[3])]));
   const R = 0.28;
