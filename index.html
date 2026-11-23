@@ -912,49 +912,53 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     t.repeat.set(u1 - u0, yb - yt); t.offset.set(u0, 1 - yb);
     return new T.MeshStandardMaterial({ map: t, roughness: 0.35, emissive: 0xffffff, emissiveMap: t, emissiveIntensity: glow || 0.25 });
   }
-  // 2026-11-22：展示桌左移，離 A1 牆約一人寬（70 cm）、離 A2 牆 1 米，不擋 65 吋螢幕；桌子和牆中間放 2 張椅子（面向訪客）
-  deskBox(140, 240, 221, 291, 90, MAT.white); deskBox(240, 340, 221, 291, 90, MAT.white);
-  block(140, 340, 291.2, 292, 22, 26, MAT_BLUE, G.furniture, false);
-  block(150, 190, 236, 271, 90, 108, MAT.chairWhite); block(155, 185, 241, 266, 108, 110, MAT.black);   // 印表機（左側）
-  [190, 290].forEach(x => chair(x, 180, [0, 1], MAT.chairWhite));
+  // 2026-11-23：A2 牆前的兩張平台桌（含印表機）換成圓形洽談桌（直徑 80）＋ 2 椅，不擋 65 吋螢幕
+  roundTable(230, 250, 40, 75);
+  [0, 180].forEach(d => { const t = d * Math.PI / 180; chairToward(230 + 68 * Math.cos(t), 250 + 68 * Math.sin(t), 230, 250, MAT.chairWhite); });
   // A1 牆面 x=71，視線朝西；a 端 y=730 是海報左邊
   block(71, 74, 645, 681, 147, 176, MAT.white);                                                     // 感應式電子床頭卡（海報 u .08–.14）
   facePlane([74.5, 681], [74.5, 645], 147, 176, cropMat('A1', .08, .14, 308 / 886, 403 / 886), G.furniture);
-  block(71, 101, 445, 525, 4, 100, MAT.white); block(101, 101.8, 445, 525, 22, 26, MAT_BLUE, G.furniture, false);   // 小櫃（電視正下方）
+  deskBox(72, 142, 435, 535, 70, MAT.white); block(144, 144.8, 435, 535, 22, 26, MAT_BLUE, G.furniture, false);   // 電視正下方桌台 寬 100×深 70×高 70（2026-11-23 跟乳房區同尺寸）
   block(71, 75, 420, 550, 112, 188, MAT.black);                                                     // 55 吋 Hospital TV（海報 u .295–.5075）
   facePlane([75.5, 550], [75.5, 420], 112, 188, cropMat('A1', .295, .5075, 268 / 886, 520 / 886, .35), G.furniture);
-  // 電子白板（55 吋螢幕）前面：圓形洽談桌（直徑 80）＋ 4 椅，跟中央洽談區同款（2026-11-22）
+  // 電子白板（55 吋螢幕）前面：圓形洽談桌（直徑 80）＋ 2 椅（2026-11-23 由 4 椅改 2 椅）
   roundTable(240, 485, 40, 75);
-  [45, 135, 225, 315].forEach(d => { const t = d * Math.PI / 180; chairToward(240 + 68 * Math.cos(t), 485 + 68 * Math.sin(t), 240, 485, MAT.chairWhite); });
+  [90, 270].forEach(d => { const t = d * Math.PI / 180; chairToward(240 + 68 * Math.cos(t), 485 + 68 * Math.sin(t), 240, 485, MAT.chairWhite); });
   // A2 牆面 y=121，視線朝北；a 端 x=70 是海報左邊
   block(371, 452, 121, 125, 78, 243, MAT.black);                                                    // 65 吋直立觸控螢幕（海報 u .5675–.72）
   facePlane([371, 125.5], [452, 125.5], 78, 243, cropMat('A2', .5675, .72, 103 / 1019, 725 / 1019, .35), G.furniture);
 
-  // 長照 BODYGO（v4）：握力肌力檢測（直式螢幕）、兩個小展示桌、AR 樂齡運動體感（橫式螢幕）、青埔模型、活動展示桌
+  // 長照 BODYGO（v4）：握力肌力檢測（直式螢幕）、圓形洽談桌、AR 樂齡運動體感（橫式螢幕）、青埔模型、活動展示桌
   // 2026-11-22：螢幕和桌子排成一排，以 B1／B5 交界（x=1400）為中心、離牆 1 米（y=220）
   monitor(1215, 220, 63, 110, 70, 0);    // 直式（握力肌力檢測）
-  deskBox(1267, 1367, 185, 255, 70, MAT.white); deskBox(1387, 1487, 185, 255, 70, MAT.white);   // 展示桌 100×70×70 ×2
+  roundTable(1390, 220, 40, 75);   // 2026-11-23：兩張展示桌換成 1 張圓形洽談桌（不放椅子）
   monitor(1562, 220, 110, 63, 95, 0);    // 橫式（AR 樂齡體感）
+  // 長照區前面空地：圓形洽談桌＋ 4 椅（2026-11-23）
+  roundTable(1390, 460, 40, 75);
+  [45, 135, 225, 315].forEach(d => { const t = d * Math.PI / 180; chairToward(1390 + 68 * Math.cos(t), 460 + 68 * Math.sin(t), 1390, 460, MAT.chairWhite); });
   deskBox(805, 1000, 402, 498, 85, MAT.white);   // 青埔壹號苑 模型展示 200×100
   block(820, 985, 410, 490, 85, 87, new T.MeshStandardMaterial({ color: 0x8fbf6a, roughness: 1 }));
   [[850, 430, 35], [900, 450, 55], [950, 430, 28], [880, 470, 22], [950, 470, 40]].forEach(b => block(b[0] - 15, b[0] + 15, b[1] - 12, b[1] + 12, 87, 87 + b[2], MAT.chairWhite));
   block(808, 997, 405, 495, 87, 150, MAT.glass).castShadow = false;
 
   // 精準大健康（v4）
-  deskBox(72, 142, 985, 1085, 70, MAT.white);   // 展示桌 寬 100×深 70×高 70（乳房攝影模型，2026-11-22）
-  block(142, 142.8, 985, 1085, 22, 26, MAT_PINK_LINE, G.furniture, false);
+  // 2026-11-23：C2 前的展示桌換成圓形洽談桌（不放椅子），乳房衛教模型放在圓桌上
+  roundTable(118, 1035, 40, 75);
   { // 乳房衛教模型（平放在桌上，乳房朝上）：白色底座＋膚色胸部模型，底座前緣粉紅線
     const SKIN = new T.MeshStandardMaterial({ color: 0xf0c4a4, roughness: 0.6 });
-    block(84, 132, 1003, 1067, 70, 73, MAT.white);                 // 底座
-    block(90, 126, 1008, 1062, 73, 79, SKIN);                      // 胸部模型（平躺）
-    [1022, 1048].forEach(y => {
+    block(94, 142, 1008, 1062, 75, 78, MAT.white);                 // 底座
+    block(100, 136, 1012, 1058, 78, 84, SKIN);                     // 胸部模型（平躺）
+    [1024, 1046].forEach(y => {
       const b = new T.Mesh(new T.SphereGeometry(m(10), 24, 16, 0, Math.PI * 2, 0, Math.PI / 2), SKIN);
-      b.position.set(wx(108), m(79), wz(y)); b.castShadow = true; G.furniture.add(b);
+      b.position.set(wx(118), m(84), wz(y)); b.castShadow = true; G.furniture.add(b);
       const n = new T.Mesh(new T.SphereGeometry(m(1.6), 12, 8), new T.MeshStandardMaterial({ color: 0xc98a78, roughness: 0.6 }));
-      n.position.set(wx(108), m(89), wz(y)); G.furniture.add(n);
+      n.position.set(wx(118), m(94), wz(y)); G.furniture.add(n);
     });
-    facePlane([132.5, 1067], [132.5, 1003], 70.5, 72.5, MAT_PINK_LINE, G.furniture);   // 底座前緣粉紅線
+    facePlane([142.5, 1062], [142.5, 1008], 75.5, 77.5, MAT_PINK_LINE, G.furniture);   // 底座前緣粉紅線
   }
+  // 乳房區前面空地：圓形洽談桌＋ 4 椅（2026-11-23）
+  roundTable(300, 1050, 40, 75);
+  [45, 135, 225, 315].forEach(d => { const t = d * Math.PI / 180; chairToward(300 + 68 * Math.cos(t), 1050 + 68 * Math.sin(t), 300, 1050, MAT.chairWhite); });
   deskBox(410, 510, 1252, 1322, 90, MAT.white); deskBox(510, 610, 1252, 1322, 90, MAT.white);   // 展示活動桌 200×70（印表機）＋ 2 椅
   block(560, 600, 1265, 1300, 90, 108, MAT.chairWhite); block(565, 595, 1270, 1295, 108, 110, MAT.black);
   block(440, 485, 1272, 1300, 90, 92, MAT.black);
@@ -1037,7 +1041,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   const COLL = WALL_RECTS.map(r => [wx(r[0]), wx(r[1]), wz(r[2]), wz(r[3])]);
   // 主要家具也擋一下（吧檯弧形用三塊近似、儲藏室斜角兩塊）
   [[572, 708, 832, 968], [792, 928, 832, 968], [1250, 1340, 1447, 1500], [1747, 1800, 900, 1050], [1266, 1429, 1121, 1286],
-   [72, 142, 985, 1085], [140, 290, 1195, 1345], [165, 315, 410, 560], [805, 1000, 402, 498], [1184, 1617, 185, 255], [410, 610, 1252, 1322], [140, 340, 221, 291], [71, 101, 445, 525],
+   [78, 158, 995, 1075], [250, 350, 1000, 1100], [140, 290, 1195, 1345], [200, 280, 440, 530], [805, 1000, 402, 498], [1185, 1245, 195, 245], [1350, 1430, 180, 260], [1532, 1592, 195, 245], [1340, 1440, 410, 510], [410, 610, 1252, 1322], [190, 270, 210, 290], [71, 144, 433, 537],
    [1145, 1195, 900, 958], [1180, 1250, 830, 905], [1240, 1305, 798, 845], [1255, 1290, 935, 975], [1285, 1325, 905, 945]]
     .forEach(r => COLL.push([wx(r[0]), wx(r[1]), wz(r[2]), wz(r[3])]));
   const R = 0.28;
