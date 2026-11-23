@@ -966,8 +966,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   // C1「自律神經檢測」那段前面：圓形洽談桌（直徑 80）＋ 4 椅，跟中央洽談區同款（2026-11-22）
   roundTable(215, 1270, 40, 75);
   [45, 135, 225, 315].forEach(d => { const t = d * Math.PI / 180; chairToward(215 + 68 * Math.cos(t), 1270 + 68 * Math.sin(t), 215, 1270, MAT.chairWhite); });
-  block(651, 794, 1392, 1398, 110, 191, MAT.black);   // 65 吋觸控電視（老闆那面牆內側東段）
-  facePlane([794, 1391.5], [651, 1391.5], 113, 188, MAT.screen, G.furniture);
+  // 2026-11-23：C1 牆上的 65 吋觸控電視拿掉
 
   // 吧檯：儲藏室西北斜角前的 1/4 圓弧櫃台＋ 2 張圓凳（v4）
   const BAR_C = [1305, 958];
